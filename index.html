@@ -1,0 +1,86 @@
+<html>
+  <head>
+    <title>hawring</title>
+    <meta content='text/html; charset=utf-8' http-equiv='Content-Type' />
+    <script type="text/javascript" src="http://ajax.googleapis.com/ajax/libs/jquery/2.0.2/jquery.min.js"></script>
+    <script type="text/javascript" src="http://underscorejs.org/underscore-min.js"></script>
+    <style type="text/css">
+    </style>
+    <script type="text/javascript">
+jQuery.event.props.push('dataTransfer');
+var currentFilename = '';
+
+function update() {
+$.ajax({
+url: 'current.json',
+cache: false,
+dataType: 'json',
+}).done(function (data) {
+console.log(data.filename);
+if (currentFilename == data.filename)
+return;
+
+currentFilename = data.filename;
+var filepath = 'music/' + currentFilename;
+
+$('audio').attr('src', filepath);
+});
+
+_.delay(update, 5000);
+}
+
+$(function() {
+update();
+
+$(window).on(
+    'dragover',
+    function(e) {
+return false;
+    }
+)
+$(window).on(
+    'dragenter',
+    function(e) {
+return false;
+    }
+)
+$(window).on(
+    'dragleave',
+    function(e) {
+return false;
+    }
+)
+
+$(window).on('drop', function(e) {
+if(e.dataTransfer){
+            if(e.dataTransfer.files.length) {
+
+var fd = new FormData();
+fd.append('file', e.dataTransfer.files[0]);
+
+$.ajax({
+url: 'upload.rb',
+type: 'POST',
+data: fd,
+contentType: false,
+processData: false,
+}).done(function (data) {
+console.log(data);
+})
+.fail(function() {
+console.log('error');
+});
+            }   
+        }
+return false;
+});
+
+});
+    </script>
+  </head>
+  <body>
+    <audio id="audio" src="" controls loop autoplay>
+      <p>audioタグをサポートしたブラウザでしか動作しません。</p>
+    </audio>
+  </body>
+</html>
